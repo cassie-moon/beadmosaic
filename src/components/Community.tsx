@@ -680,7 +680,13 @@ const DesignCard = ({
           </button>
 
           <button
-            onClick={onToggleComments}
+            onClick={() => {
+              if (!currentUser) {
+                onShowLogin();
+              } else {
+                onToggleComments();
+              }
+            }}
             className={`flex items-center gap-1 transition-colors ${comments.length > 0 ? 'text-emerald-500' : 'text-gray-400 hover:text-gray-600'}`}
           >
             <MessageCircle className="w-4 h-4" />
@@ -692,9 +698,19 @@ const DesignCard = ({
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="写下你的评论..."
+            placeholder={currentUser ? "写下你的评论..." : "登录后即可评论..."}
             value={newComment}
             onChange={e => setNewComment(e.target.value)}
+            onFocus={() => !currentUser && onShowLogin()}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                if (!currentUser) {
+                  onShowLogin();
+                } else if (newComment.trim()) {
+                  onAddComment();
+                }
+              }
+            }}
             className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-300"
           />
           <button
