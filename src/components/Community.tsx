@@ -82,11 +82,15 @@ const generateMockDesigns = (): CommunityDesign[] => {
       tags: ['可爱', '彩色'],
       pattern: [],
       colorCounts: [],
-      previewImage: '/design1.jpg',
+      previewImage: '/beadmosaic/design1.jpg',
       likes: 128,
       rating: 4.8,
       ratingCount: 32,
-      comments: [{ id: 'c1', author: '拼豆小能手', authorId: 'user1', content: '太可爱了！', createdAt: '2024-01-15' }],
+      comments: [
+        { id: 'c1', author: '拼豆小能手', authorId: 'user1', content: '太可爱了！', createdAt: '2024-01-15' },
+        { id: 'c2', author: '创意达人', authorId: 'user2', content: '配色好棒，想收藏！', createdAt: '2024-01-16' },
+        { id: 'c3', author: '手工爱好者', authorId: 'user3', content: '已做好，实物超好看！', createdAt: '2024-01-17' },
+      ],
       createdAt: '2024-01-15',
       size: 32,
     },
@@ -99,11 +103,14 @@ const generateMockDesigns = (): CommunityDesign[] => {
       tags: ['彩虹', '彩色'],
       pattern: [],
       colorCounts: [],
-      previewImage: '/design2.jpg',
+      previewImage: '/beadmosaic/design2.jpg',
       likes: 256,
       rating: 4.9,
       ratingCount: 58,
-      comments: [],
+      comments: [
+        { id: 'c4', author: '拼豆小能手', authorId: 'user1', content: '彩虹配色太治愈了🌈', createdAt: '2024-01-14' },
+        { id: 'c5', author: '手工爱好者', authorId: 'user3', content: '求图纸！想做一个大的', createdAt: '2024-01-15' },
+      ],
       createdAt: '2024-01-14',
       size: 32,
     },
@@ -116,11 +123,14 @@ const generateMockDesigns = (): CommunityDesign[] => {
       tags: ['可爱', '精致'],
       pattern: [],
       colorCounts: [],
-      previewImage: '/design3.jpg',
+      previewImage: '/beadmosaic/design3.jpg',
       likes: 89,
       rating: 4.6,
       ratingCount: 21,
-      comments: [],
+      comments: [
+        { id: 'c6', author: '创意达人', authorId: 'user2', content: '细节处理得真好！', createdAt: '2024-01-13' },
+        { id: 'c7', author: '拼豆小能手', authorId: 'user1', content: '这个角色好酷，请问用什么色号？', createdAt: '2024-01-14' },
+      ],
       createdAt: '2024-01-13',
       size: 32,
     },
@@ -133,11 +143,15 @@ const generateMockDesigns = (): CommunityDesign[] => {
       tags: ['粉色', '少女心'],
       pattern: [],
       colorCounts: [],
-      previewImage: '/design4.jpg',
+      previewImage: '/beadmosaic/design4.jpg',
       likes: 175,
       rating: 4.7,
       ratingCount: 45,
-      comments: [],
+      comments: [
+        { id: 'c8', author: '手工爱好者', authorId: 'user3', content: '少女心爆棚！太喜欢了💕', createdAt: '2024-01-12' },
+        { id: 'c9', author: '创意达人', authorId: 'user2', content: '适合做挂件，已收藏', createdAt: '2024-01-13' },
+        { id: 'c10', author: '拼豆小能手', authorId: 'user1', content: '谢谢大家喜欢~会出教程的', createdAt: '2024-01-14' },
+      ],
       createdAt: '2024-01-12',
       size: 32,
     },
@@ -173,10 +187,10 @@ export const Community = ({ onSelectPattern, onSwitchToUpload, currentPattern, c
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ name: string; avatar: string } | null>(null);
-  const [likedDesigns, setLikedDesigns] = useState<Set<string>>(new Set());
-  const [ratedDesigns, setRatedDesigns] = useState<Set<string>>(new Set());
+  const [likedDesigns, setLikedDesigns] = useState<string[]>([]);
+  const [ratedDesigns, setRatedDesigns] = useState<string[]>([]);
   const [showComments, setShowComments] = useState<string | null>(null);
-  const [newComment, setNewComment] = useState('');
+  const [newComments, setNewComments] = useState<Record<string, string>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [previewTitle, setPreviewTitle] = useState('');
 
@@ -227,7 +241,7 @@ export const Community = ({ onSelectPattern, onSwitchToUpload, currentPattern, c
     setDesigns(prev =>
       prev.map(d => {
         if (d.id === designId) {
-          const isLiked = likedDesigns.has(designId);
+          const isLiked = likedDesigns.includes(designId);
           return {
             ...d,
             likes: isLiked ? d.likes - 1 : d.likes + 1,
@@ -237,15 +251,11 @@ export const Community = ({ onSelectPattern, onSwitchToUpload, currentPattern, c
       })
     );
 
-    setLikedDesigns(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(designId)) {
-        newSet.delete(designId);
-      } else {
-        newSet.add(designId);
-      }
-      return newSet;
-    });
+    setLikedDesigns(prev =>
+      prev.includes(designId)
+        ? prev.filter(id => id !== designId)
+        : [...prev, designId]
+    );
   };
 
   const handleRate = (designId: string, rating: number) => {
@@ -254,7 +264,7 @@ export const Community = ({ onSelectPattern, onSwitchToUpload, currentPattern, c
       return;
     }
 
-    if (ratedDesigns.has(designId)) return;
+    if (ratedDesigns.includes(designId)) return;
 
     setDesigns(prev =>
       prev.map(d => {
@@ -271,17 +281,22 @@ export const Community = ({ onSelectPattern, onSwitchToUpload, currentPattern, c
       })
     );
 
-    setRatedDesigns(prev => new Set(prev).add(designId));
+    setRatedDesigns(prev => [...prev, designId]);
   };
 
   const handleAddComment = (designId: string) => {
-    if (!currentUser || !newComment.trim()) return;
+    const commentText = newComments[designId] || '';
+    if (!currentUser) {
+      setShowLoginModal(true);
+      return;
+    }
+    if (!commentText.trim()) return;
 
     const comment: Comment = {
       id: `comment-${Date.now()}`,
       author: currentUser.name,
       authorId: 'current',
-      content: newComment,
+      content: commentText,
       createdAt: new Date().toISOString().split('T')[0],
     };
 
@@ -297,7 +312,7 @@ export const Community = ({ onSelectPattern, onSwitchToUpload, currentPattern, c
       })
     );
 
-    setNewComment('');
+    setNewComments(prev => ({ ...prev, [designId]: '' }));
   };
 
   const handleUseDesign = (design: CommunityDesign) => {
@@ -317,8 +332,8 @@ export const Community = ({ onSelectPattern, onSwitchToUpload, currentPattern, c
 
   const handleLogout = () => {
     setCurrentUser(null);
-    setLikedDesigns(new Set());
-    setRatedDesigns(new Set());
+    setLikedDesigns([]);
+    setRatedDesigns([]);
   };
 
   const handleUpload = () => {
@@ -445,17 +460,18 @@ export const Community = ({ onSelectPattern, onSwitchToUpload, currentPattern, c
             <DesignCard
               key={design.id}
               design={design}
-              isLiked={likedDesigns.has(design.id)}
-              isRated={ratedDesigns.has(design.id)}
+              isLiked={likedDesigns.includes(design.id)}
+              isRated={ratedDesigns.includes(design.id)}
               onLike={handleLike}
               onRate={handleRate}
               onUse={handleUseDesign}
               onToggleComments={() => setShowComments(showComments === design.id ? null : design.id)}
               comments={showComments === design.id ? design.comments : []}
-              newComment={newComment}
-              setNewComment={setNewComment}
+              newComment={newComments[design.id] || ''}
+              setNewComment={(text) => setNewComments(prev => ({ ...prev, [design.id]: text }))}
               onAddComment={() => handleAddComment(design.id)}
               currentUser={currentUser}
+              onShowLogin={() => setShowLoginModal(true)}
             />
           ))}
         </div>
@@ -465,17 +481,18 @@ export const Community = ({ onSelectPattern, onSwitchToUpload, currentPattern, c
             <DesignListItem
               key={design.id}
               design={design}
-              isLiked={likedDesigns.has(design.id)}
-              isRated={ratedDesigns.has(design.id)}
+              isLiked={likedDesigns.includes(design.id)}
+              isRated={ratedDesigns.includes(design.id)}
               onLike={handleLike}
               onRate={handleRate}
               onUse={handleUseDesign}
               onToggleComments={() => setShowComments(showComments === design.id ? null : design.id)}
               comments={showComments === design.id ? design.comments : []}
-              newComment={newComment}
-              setNewComment={setNewComment}
+              newComment={newComments[design.id] || ''}
+              setNewComment={(text) => setNewComments(prev => ({ ...prev, [design.id]: text }))}
               onAddComment={() => handleAddComment(design.id)}
               currentUser={currentUser}
+              onShowLogin={() => setShowLoginModal(true)}
             />
           ))}
         </div>
@@ -582,6 +599,7 @@ interface DesignCardProps {
   setNewComment: (v: string) => void;
   onAddComment: () => void;
   currentUser: { name: string; avatar: string } | null;
+  onShowLogin: () => void;
 }
 
 const DesignCard = ({
@@ -597,6 +615,7 @@ const DesignCard = ({
   setNewComment,
   onAddComment,
   currentUser,
+  onShowLogin,
 }: DesignCardProps) => {
   const [hoverRating, setHoverRating] = useState(0);
   const previewUrl = design.previewImage || (design.pattern && design.pattern.length > 0 ? renderPatternPreview(design.pattern, design.size) : '');
@@ -670,10 +689,10 @@ const DesignCard = ({
         </div>
       </div>
 
-      {comments.length > 0 && (
+      {comments.length > 0 ? (
         <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3">
-          <h4 className="text-gray-700 text-sm font-medium">评论</h4>
-          <div className="space-y-2 max-h-32 overflow-y-auto">
+          <h4 className="text-gray-700 text-sm font-medium">评论 ({comments.length})</h4>
+          <div className="space-y-2 max-h-48 overflow-y-auto">
             {comments.map(comment => (
               <div key={comment.id} className="bg-gray-50 rounded-lg p-2.5">
                 <div className="flex items-center gap-2 mb-1">
@@ -684,23 +703,52 @@ const DesignCard = ({
               </div>
             ))}
           </div>
-          {currentUser && (
-            <div className="flex gap-2 mt-2">
-              <input
-                type="text"
-                placeholder="写下你的评论..."
-                value={newComment}
-                onChange={e => setNewComment(e.target.value)}
-                className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-300"
-              />
-              <button
-                onClick={onAddComment}
-                className="px-3 py-2 bg-emerald-500 text-white rounded-lg text-sm hover:bg-emerald-600 transition-colors"
-              >
-                发送
-              </button>
-            </div>
-          )}
+          <div className="flex gap-2 mt-2">
+            <input
+              type="text"
+              placeholder="写下你的评论..."
+              value={newComment}
+              onChange={e => setNewComment(e.target.value)}
+              className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-300"
+            />
+            <button
+              onClick={() => {
+                if (!currentUser) {
+                  onShowLogin();
+                } else if (newComment.trim()) {
+                  onAddComment();
+                }
+              }}
+              className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm hover:bg-emerald-600 transition-colors whitespace-nowrap"
+            >
+              发布评论
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+          <p className="text-gray-400 text-sm text-center py-2">暂无评论，快来抢沙发吧~</p>
+          <div className="flex gap-2 mt-2">
+            <input
+              type="text"
+              placeholder="写下你的评论..."
+              value={newComment}
+              onChange={e => setNewComment(e.target.value)}
+              className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-300"
+            />
+            <button
+              onClick={() => {
+                if (!currentUser) {
+                  onShowLogin();
+                } else if (newComment.trim()) {
+                  onAddComment();
+                }
+              }}
+              className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm hover:bg-emerald-600 transition-colors whitespace-nowrap"
+            >
+              发布评论
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -720,6 +768,7 @@ interface DesignListItemProps {
   setNewComment: (v: string) => void;
   onAddComment: () => void;
   currentUser: { name: string; avatar: string } | null;
+  onShowLogin: () => void;
 }
 
 const DesignListItem = ({
@@ -735,6 +784,7 @@ const DesignListItem = ({
   setNewComment,
   onAddComment,
   currentUser,
+  onShowLogin,
 }: DesignListItemProps) => {
   const [hoverRating, setHoverRating] = useState(0);
   const previewUrl = design.previewImage || renderPatternPreview(design.pattern, design.size);
