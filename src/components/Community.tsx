@@ -681,17 +681,40 @@ const DesignCard = ({
 
           <button
             onClick={onToggleComments}
-            className="flex items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors"
+            className={`flex items-center gap-1 transition-colors ${comments.length > 0 ? 'text-emerald-500' : 'text-gray-400 hover:text-gray-600'}`}
           >
             <MessageCircle className="w-4 h-4" />
-            <span className="text-sm">{design.comments.length}</span>
+            <span className="text-sm">{design.comments.length} 评论</span>
+          </button>
+        </div>
+
+        {/* 评论输入框 - 始终显示 */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="写下你的评论..."
+            value={newComment}
+            onChange={e => setNewComment(e.target.value)}
+            className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-300"
+          />
+          <button
+            onClick={() => {
+              if (!currentUser) {
+                onShowLogin();
+              } else if (newComment.trim()) {
+                onAddComment();
+              }
+            }}
+            className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm hover:bg-emerald-600 transition-colors whitespace-nowrap"
+          >
+            发布
           </button>
         </div>
       </div>
 
-      {comments.length > 0 ? (
-        <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3">
-          <h4 className="text-gray-700 text-sm font-medium">评论 ({comments.length})</h4>
+      {/* 评论列表 - 点击展开后显示 */}
+      {comments.length > 0 && (
+        <div className="px-4 pb-4 space-y-2 border-t border-gray-100 pt-3">
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {comments.map(comment => (
               <div key={comment.id} className="bg-gray-50 rounded-lg p-2.5">
@@ -702,52 +725,6 @@ const DesignCard = ({
                 <p className="text-gray-600 text-sm">{comment.content}</p>
               </div>
             ))}
-          </div>
-          <div className="flex gap-2 mt-2">
-            <input
-              type="text"
-              placeholder="写下你的评论..."
-              value={newComment}
-              onChange={e => setNewComment(e.target.value)}
-              className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-300"
-            />
-            <button
-              onClick={() => {
-                if (!currentUser) {
-                  onShowLogin();
-                } else if (newComment.trim()) {
-                  onAddComment();
-                }
-              }}
-              className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm hover:bg-emerald-600 transition-colors whitespace-nowrap"
-            >
-              发布评论
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="px-4 pb-4 border-t border-gray-100 pt-3">
-          <p className="text-gray-400 text-sm text-center py-2">暂无评论，快来抢沙发吧~</p>
-          <div className="flex gap-2 mt-2">
-            <input
-              type="text"
-              placeholder="写下你的评论..."
-              value={newComment}
-              onChange={e => setNewComment(e.target.value)}
-              className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-300"
-            />
-            <button
-              onClick={() => {
-                if (!currentUser) {
-                  onShowLogin();
-                } else if (newComment.trim()) {
-                  onAddComment();
-                }
-              }}
-              className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm hover:bg-emerald-600 transition-colors whitespace-nowrap"
-            >
-              发布评论
-            </button>
           </div>
         </div>
       )}
