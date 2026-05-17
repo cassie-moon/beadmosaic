@@ -120,7 +120,13 @@ export const UploadPanel = ({
 
         {selectedImage && (
           <button
-            onClick={onRemoveImage}
+            onClick={() => {
+              // 清除 file input 的值，确保可以重新上传
+              if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+              }
+              onRemoveImage();
+            }}
             className="w-full mt-3 py-2.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2"
           >
             <X className="w-4 h-4" />
